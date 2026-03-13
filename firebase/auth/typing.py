@@ -27,7 +27,7 @@ class ProviderUserInfo(TypedDict):
 
 
 class UserRecord(TypedDict):
-    localId: "NotRequired[str]"
+    localId: str
     displayName: "NotRequired[str]"
     email: "NotRequired[str]"
     phoneNumber: "NotRequired[str]"
@@ -44,7 +44,7 @@ class UserRecord(TypedDict):
     customAttributes: "NotRequired[Annotated[str, 'json']]"
     tenantId: "NotRequired[str]"
     # === Not listed by firebase_admin:
-    passwordUpdatedAt: "NotRequired[int]"
+    passwordUpdatedAt: "NotRequired[Annotated[str, 'int | datetime.date.fromtimestamp']]"
     passwordHash: "NotRequired[Annotated[str, 'base64']]"
 
 
