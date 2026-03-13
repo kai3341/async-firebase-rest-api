@@ -691,6 +691,13 @@ class Auth:
 			FirebaseError: If an error occurs while generating the link
 		"""
 
+		if not self.credentials.valid:
+			self.credentials.refresh(Request())
+
+		access_token = self.credentials.token
+
+		headers = {"Authorization": "Bearer " + access_token, "content-type": "application/json; charset=UTF-8"}
+
 		request_ref = "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={0}".format(self.api_key)
 
 		payload = {
@@ -702,7 +709,6 @@ class Auth:
 		if action_code_settings:
 			payload.update(action_code_settings)
 
-		headers = {"content-type": "application/json; charset=UTF-8"}
 		request_object = await self.requests.post(request_ref, headers=headers, json=payload)
 
 		raise_detailed_error(request_object)
