@@ -125,6 +125,9 @@ class TestAuth:
 		assert await auth.delete_user_account(self.__class__.user.get('idToken'))
 		assert await auth.delete_user_account(self.__class__.anonymous_user.get('idToken'))
 
+	@pytest.mark.xfail
+	async def test_generate_password_reset_link(self, auth):
+		assert await auth.generate_password_reset_link(self.__class__.user.get('email'))
 
 class TestAuthAdmin:
 
