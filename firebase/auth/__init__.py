@@ -14,6 +14,7 @@ A simple python wrapper for Google's
 
 import json
 import math
+from typing import Optional
 import webbrowser
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
@@ -671,7 +672,7 @@ class Auth:
 
 		return claims
 
-	async def generate_password_reset_link(self, email: str, action_code_settings: ActionCodeSettings) -> str:
+	async def generate_password_reset_link(self, email: str, action_code_settings: Optional[ActionCodeSettings] = None) -> str:
 		"""Generates the out-of-band email action link for password reset flows for the specified
 		email address.
 
