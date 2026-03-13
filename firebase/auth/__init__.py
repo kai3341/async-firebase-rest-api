@@ -14,6 +14,7 @@ A simple python wrapper for Google's
 
 import json
 import math
+from typing import Optional
 import webbrowser
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
@@ -29,6 +30,7 @@ from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption,
 
 from firebase._exception import raise_detailed_error
 from firebase.auth.oauth_flow import start_oauth_flow
+from .typing import ActionCodeSettings
 
 
 class Auth:
@@ -669,6 +671,50 @@ class Auth:
 		_, claims = jwt.verify_jwt(id_token, pub_key, [header['alg']], checks_optional=True)
 
 		return claims
+
+	async def generate_password_reset_link(self, email: str, action_code_settings: Optional[ActionCodeSettings] = None) -> str:
+		"""Generates the out-of-band email action link for password reset flows for the specified
+		email address.
+
+		Args:
+			email: The email of the user whose password is to be reset.
+			action_code_settings: ``firebase.auth.ActionCodeSettings`` instance (optional). Defines whether
+				the link is to be handled by a mobile app and the additional state information to
+				be passed in the deep link.
+
+		Returns:
+			link: The password reset link created by the API
+
+		Raises:
+			ValueError: If the provided arguments are invalid
+			EmailNotFoundError: If no user exists for the specified email address.
+			FirebaseError: If an error occurs while generating the link
+		"""
+
+		if not self.credentials.valid:
+			self.credentials.refresh(Request())
+
+		access_token = self.credentials.token
+
+		headers = {"Authorization": "Bearer " + access_token, "content-type": "application/json; charset=UTF-8"}
+
+		request_ref = "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={0}".format(self.api_key)
+
+		payload = {
+			'requestType': 'PASSWORD_RESET',
+			'email': email,
+			'returnOobLink': True
+		}
+
+		if action_code_settings:
+			payload.update(action_code_settings)
+
+		request_object = await self.requests.post(request_ref, headers=headers, json=payload)
+
+		raise_detailed_error(request_object)
+
+		response = request_object.json()
+		return response['oobLink']
 
 
 def _token_expire_time(user):
