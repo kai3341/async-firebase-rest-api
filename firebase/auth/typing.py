@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
-    from typing import NotRequired
+    from typing import NotRequired, Literal, Annotated
 
 
 class ActionCodeSettings(TypedDict):
@@ -16,16 +16,38 @@ class ActionCodeSettings(TypedDict):
 
 
 class ProviderUserInfo(TypedDict):
-    providerId: str
-    federatedId: str
-    email: str
     rawId: str
+    displayName: "NotRequired[str]"
+    email: "NotRequired[str]"
+    phoneNumber: "NotRequired[str]"
+    photoUrl: "NotRequired[str]"
+    providerId: "NotRequired[str]"
+    # === Not listed by firebase_admin:
+    federatedId: "NotRequired[str]"
 
 
 class UserRecord(TypedDict):
-    localId: str
-    email: str
-    passwordHash: str
-    emailVerified: bool
-    passwordUpdatedAt: int
-    providerUserInfo: list[ProviderUserInfo]
+    localId: "NotRequired[str]"
+    displayName: "NotRequired[str]"
+    email: "NotRequired[str]"
+    phoneNumber: "NotRequired[str]"
+    photoUrl: "NotRequired[str]"
+    emailVerified: "NotRequired[bool]"
+    disabled: "NotRequired[Literal[True]]"
+    validSince: "NotRequired[Annotated[str, 'int | datetime.date.fromtimestamp']]"
+    # <=== user_metadata
+    lastRefreshAt: "NotRequired[Annotated[str, 'datetime.datetime.fromisoformat']]"
+    createdAt: "NotRequired[Annotated[str, 'int | datetime.date.fromtimestamp']]"
+    lastLoginAt: "NotRequired[Annotated[str, 'int | datetime.date.fromtimestamp']]"
+    # user_metadata ===>
+    providerUserInfo: "NotRequired[list[ProviderUserInfo]]"
+    customAttributes: "NotRequired[Annotated[str, 'json']]"
+    tenantId: "NotRequired[str]"
+    # === Not listed by firebase_admin:
+    passwordUpdatedAt: "NotRequired[int]"
+    passwordHash: "NotRequired[Annotated[str, 'base64']]"
+
+
+class ExportedUserRecord(UserRecord):
+    # passwordHash provided by UserRecord
+    salt: "NotRequired[Annotated[str, 'base64']]"
