@@ -30,7 +30,7 @@ from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption,
 
 from firebase._exception import raise_detailed_error
 from firebase.auth.oauth_flow import start_oauth_flow
-from .typing import ActionCodeSettings
+from .typing import ActionCodeSettings, UserRecord
 
 
 class Auth:
@@ -716,6 +716,60 @@ class Auth:
 		response = request_object.json()
 		return response['oobLink']
 
+	async def get_user(self, uid: str) -> UserRecord:
+		"""Gets the user data corresponding to the specified user ID.
+
+		Args:
+			uid: A user ID string.
+
+		Returns:
+			UserRecord: A user record instance.
+
+		Raises:
+			ValueError: If the user ID is None, empty or malformed.
+			UserNotFoundError: If the specified user ID does not exist.
+			FirebaseError: If an error occurs while retrieving the user.
+		"""
+
+		payload = {'localId' : [uid]}
+		return await _get_user(self.requests, self.credentials, payload)
+
+	async def get_user_by_email(self, email: str) -> UserRecord:
+		"""Gets the user data corresponding to the specified user email.
+
+		Args:
+			email: A user email address string.
+
+		Returns:
+			UserRecord: A user record instance.
+
+		Raises:
+			ValueError: If the email is None, empty or malformed.
+			UserNotFoundError: If no user exists for the specified email address.
+			FirebaseError: If an error occurs while retrieving the user.
+		"""
+
+		payload = {'email' : [email]}
+		return await _get_user(self.requests, self.credentials, payload)
+
+	async def get_user_by_phone_number(self, phone_number: str) -> UserRecord:
+		"""Gets the user data corresponding to the specified phone number.
+
+		Args:
+			phone_number: A phone number string.
+
+		Returns:
+			UserRecord: A user record instance.
+
+		Raises:
+			ValueError: If the phone number is ``None``, empty or malformed.
+			UserNotFoundError: If no user exists for the specified phone number.
+			FirebaseError: If an error occurs while retrieving the user.
+		"""
+
+		payload = {'phoneNumber' : [phone_number]}
+		return await _get_user(self.requests, self.credentials, payload)
+
 
 def _token_expire_time(user):
 	""" Adds expire time of the token in the token dictionary.
@@ -741,3 +795,24 @@ def _token_host(provider):
 
 	elif provider == 'facebook.com':
 		return 'https://graph.facebook.com/v14.0/oauth/access_token'
+
+
+async def _get_users(requests, credentials, payload) -> list[UserRecord]:
+	if not credentials.valid:
+		credentials.refresh(Request())
+
+	access_token = credentials.token
+	project_id = credentials.project_id
+
+	request_ref = "https://identitytoolkit.googleapis.com/v1/projects/{0}/accounts:lookup".format(project_id)
+
+	headers = {"Authorization": "Bearer " + access_token, "content-type": "application/json; charset=UTF-8"}
+
+	request_object = await requests.post(request_ref, headers=headers, json=payload)
+	raise_detailed_error(request_object)
+	response = request_object.json()
+	return response.get("users", [])
+
+
+async def _get_user(requests, credentials, payload) -> UserRecord:
+	return (await _get_users(requests, credentials, payload))[0]
