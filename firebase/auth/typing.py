@@ -37,14 +37,14 @@ class UserRecord(TypedDict):
     validSince: "NotRequired[Annotated[str, 'int | datetime.date.fromtimestamp']]"
     # <=== user_metadata
     lastRefreshAt: "NotRequired[Annotated[str, 'datetime.datetime.fromisoformat']]"
-    createdAt: "NotRequired[Annotated[str, 'int | datetime.date.fromtimestamp']]"
-    lastLoginAt: "NotRequired[Annotated[str, 'int | datetime.date.fromtimestamp']]"
+    createdAt: "NotRequired[Annotated[str, 'int | div(1000) | datetime.datetime.fromtimestamp']]"
+    lastLoginAt: "NotRequired[Annotated[str, 'int | div(1000) | datetime.datetime.fromtimestamp']]"
     # user_metadata ===>
     providerUserInfo: "NotRequired[list[ProviderUserInfo]]"
     customAttributes: "NotRequired[Annotated[str, 'json']]"
     tenantId: "NotRequired[str]"
     # === Not listed by firebase_admin:
-    passwordUpdatedAt: "NotRequired[Annotated[str, 'int | datetime.date.fromtimestamp']]"
+    passwordUpdatedAt: "NotRequired[Annotated[str, 'int | div(1000) | datetime.datetime.fromtimestamp']]"
     passwordHash: "NotRequired[Annotated[str, 'base64']]"
 
 
