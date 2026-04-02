@@ -770,6 +770,25 @@ class Auth:
 		payload = {'phoneNumber' : [phone_number]}
 		return await _get_user(self.requests, self.credentials, payload)
 
+	async def delete_user(self, uid: str) -> None:
+		credentials = self.credentials
+		if not credentials.valid:
+			credentials.refresh(Request())
+
+		access_token = credentials.token
+		project_id = credentials.project_id
+
+		request_ref = "https://identitytoolkit.googleapis.com/v1/projects/{0}/accounts:delete".format(project_id)
+		payload = {'localId' : uid}
+
+		headers = {"Authorization": "Bearer " + access_token, "content-type": "application/json; charset=UTF-8"}
+
+		request_object = await self.requests.post(request_ref, headers=headers, json=payload)
+		raise_detailed_error(request_object)
+		response = request_object.json()
+		if not response or not response.get('kind'):
+			raise ValueError(f'Failed to delete user: {uid}.')
+
 
 def _token_expire_time(user):
 	""" Adds expire time of the token in the token dictionary.
