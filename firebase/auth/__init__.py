@@ -717,21 +717,21 @@ class Auth:
 		return response['oobLink']
 
 	async def generate_email_verification_link(self, email: str, action_code_settings: Optional[ActionCodeSettings] = None) -> str:
-		"""Generates the out-of-band email action link for password reset flows for the specified
-		email address.
+		"""Generates the out-of-band email action link for email verification flows for the
+		specified email address.
 
 		Args:
-			email: The email of the user whose password is to be reset.
-			action_code_settings: ``firebase.auth.ActionCodeSettings`` instance (optional). Defines whether
+			email: The email of the user to be verified.
+			action_code_settings: ``ActionCodeSettings`` instance (optional). Defines whether
 				the link is to be handled by a mobile app and the additional state information to
 				be passed in the deep link.
 
 		Returns:
-			link: The password reset link created by the API
+			link: The email verification link created by the API
 
 		Raises:
 			ValueError: If the provided arguments are invalid
-			EmailNotFoundError: If no user exists for the specified email address.
+			UserNotFoundError: If no user exists for the specified email address.
 			FirebaseError: If an error occurs while generating the link
 		"""
 
