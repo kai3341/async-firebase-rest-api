@@ -346,6 +346,42 @@ class Auth:
 
 		return request_object.json()
 
+	async def generate_email_verification_link(self, email: str, action_code_settings: ActionCodeSettings| None=None):
+		"""Fetches the email action links for types
+
+		Args:
+			action_type: String. Valid values ['VERIFY_EMAIL', 'EMAIL_SIGNIN', 'PASSWORD_RESET']
+			email: Email of the user for which the action is performed
+			action_code_settings: ``ActionCodeSettings`` object or dict (optional). Defines whether
+				the link is to be handled by a mobile app and the additional state information to be
+				passed in the deep link, etc.
+		Returns:
+			link_url: action url to be emailed to the user
+
+		Raises:
+			UnexpectedResponseError: If the backend server responds with an unexpected message
+			FirebaseError: If an error occurs while generating the link
+			ValueError: If the provided arguments are invalid
+		"""
+
+		if not self.credentials.valid:
+			self.credentials.refresh(Request())
+
+		access_token = self.credentials.token
+
+		headers = {"Authorization": "Bearer " + access_token, "content-type": "application/json; charset=UTF-8"}
+
+		request_ref = "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={0}".format(self.api_key)
+
+		headers = {"content-type": "application/json; charset=UTF-8"}
+		data = {"requestType": "VERIFY_EMAIL", "email": email, 'returnOobLink': True}
+		request_object = await self.requests.post(request_ref, headers=headers, json=data)
+
+		raise_detailed_error(request_object)
+
+		return request_object.json()
+
+
 	async def send_password_reset_email(self, email):
 		""" Send a password reset email.
 
