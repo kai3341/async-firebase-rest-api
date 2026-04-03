@@ -756,6 +756,51 @@ class Auth:
 		response = request_object.json()
 		return response['oobLink']
 
+	async def generate_email_change_verification_link(self, current_email: str, new_email: str, action_code_settings: Optional[ActionCodeSettings] = None) -> str:
+		"""Generates the out-of-band email action link for email change and verification flows for the
+		specified email address.
+
+		Args:
+			current_email: Old email
+			new_email: The new email of the user to be verified.
+			action_code_settings: ``ActionCodeSettings`` instance (optional). Defines whether
+				the link is to be handled by a mobile app and the additional state information to
+				be passed in the deep link.
+
+		Returns:
+			link: The email verification link created by the API
+
+		Raises:
+			ValueError: If the provided arguments are invalid
+			UserNotFoundError: If no user exists for the specified email address.
+			FirebaseError: If an error occurs while generating the link
+		"""
+
+		if not self.credentials.valid:
+			self.credentials.refresh(Request())
+
+		access_token = self.credentials.token
+
+		headers = {"Authorization": "Bearer " + access_token, "content-type": "application/json; charset=UTF-8"}
+
+		request_ref = "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={0}".format(self.api_key)
+
+		payload = {
+			"requestType": "VERIFY_AND_CHANGE_EMAIL",
+			"email": current_email,
+			"newEmail": new_email,
+			'returnOobLink': True
+		}
+
+		if action_code_settings:
+			payload.update(action_code_settings)
+
+		request_object = await self.requests.post(request_ref, headers=headers, json=payload)
+
+		raise_detailed_error(request_object)
+
+		response = request_object.json()
+		return response['oobLink']
 
 	async def get_user(self, uid: str) -> UserRecord:
 		"""Gets the user data corresponding to the specified user ID.
