@@ -85,6 +85,10 @@ class TestAuth:
 			await auth.change_email(self.__class__.user.get('idToken'), email_2)
 		assert "OPERATION_NOT_ALLOWED" in str(exc_info.value)
 
+
+	async def test_send_verify_and_change_email(self, auth, email_2):
+		await auth.send_verify_and_change_email(self.__class__.user.get('idToken'), email_2)
+
 	async def test_change_password(self, auth,email, password_2):
 		user = await auth.change_password(self.__class__.user.get('idToken'), password_2)
 		self.__class__.user = None

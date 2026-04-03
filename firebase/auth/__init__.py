@@ -346,6 +346,36 @@ class Auth:
 
 		return request_object.json()
 
+
+	async def send_verify_and_change_email(self, id_token, new_email):
+		""" Send a verify-and-change-email OOB code.
+
+		Sends a ``VERIFY_AND_CHANGE_EMAIL`` request via the
+		Identity Toolkit ``sendOobCode`` endpoint.  The email
+		change takes effect only after the user clicks the
+		confirmation link sent to *new_email*.
+
+		| For more details:
+		| `Firebase Auth REST API | sendOobCode`_
+
+		.. _Firebase Auth REST API | sendOobCode:
+			https://firebase.google.com/docs/reference/rest/auth#section-send-email-verification
+
+		:type id_token: str
+		:param id_token: A Firebase Auth ID token for the user.
+
+		:type new_email: str
+		:param new_email: The new email address.
+		"""
+
+		request_ref = "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={0}".format(self.api_key)
+
+		headers = {"content-type": "application/json; charset=UTF-8"}
+		data = {"requestType": "VERIFY_AND_CHANGE_EMAIL", "idToken": id_token, "newEmail": new_email}
+		request_object = await self.requests.post(request_ref, headers=headers, json=data)
+
+		raise_detailed_error(request_object)
+
 	async def send_password_reset_email(self, email):
 		""" Send a password reset email.
 
